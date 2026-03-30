@@ -341,7 +341,7 @@ export default function CalendarPage() {
 
                     <span
                       className={[
-                        "text-sm sm:text-md font-semibold leading-none mb-0.5",
+                        "text-sm sm:text-sm font-semibold leading-none mb-0.5",
                         isToday
                           ? "text-violet-600 dark:text-violet-400"
                           : hasEntries
@@ -354,10 +354,10 @@ export default function CalendarPage() {
 
                     {hasEntries && (
                       <>
-                        <span className="md:text-base text-xs font-bold text-emerald-600 dark:text-emerald-400 leading-none">
+                        <span className="md:text-md text-xs font-bold text-emerald-600 dark:text-emerald-400 leading-none">
                           {formatHoursMinutes(dayData.totalHours)}
                         </span>
-                        <span className="hidden sm:block text-xs md:text-base  text-gray-400 dark:text-gray-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors mt-0.5 leading-none">
+                        <span className="hidden sm:block text-xs md:text-sm  text-gray-400 dark:text-gray-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors mt-0.5 leading-none">
                           {dayData.count}{" "}
                           {dayData.count === 1 ? "entry" : "entries"}
                         </span>
