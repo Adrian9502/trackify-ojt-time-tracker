@@ -1,8 +1,8 @@
-# 🕒 OJT Time Tracker
+# 🕒 Trackify - OJT Time Tracker
 
 A modern web application for tracking On-the-Job Training (OJT) hours. Built with Next.js, this application helps students and trainees manage their training hours, tasks, and progress towards completion requirements.
 
-![OJT Time Tracker Screenshot](screenshot.png)
+![OJT Time Tracker Screenshot](https://github.com/user-attachments/assets/8f4cf114-5225-4c2b-aa5c-d17a56ce652a)
 
 ## ✨ Features
 
