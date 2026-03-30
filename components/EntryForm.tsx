@@ -82,7 +82,6 @@ export default function EntryForm({
     setLoading(true);
     try {
       if (isEditMode && entry) {
-        // Edit existing task
         const updatedTasks = entry.tasks.map((task) =>
           task.id === taskId
             ? {
@@ -117,7 +116,6 @@ export default function EntryForm({
         if (!response.ok) throw new Error("Failed to update task");
         toast.success("Task updated successfully!");
       } else {
-        // Create new task
         const response = await fetch("/api/entries", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -151,16 +149,25 @@ export default function EntryForm({
     }
   };
 
+  const inputClass =
+    "w-full text-sm px-3 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 dark:focus:ring-violet-400 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500";
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full my-8">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 max-w-2xl w-full my-8 overflow-hidden">
+        {/* Gradient top accent bar — matches dashboard stat cards */}
+        <div className="h-0.5 w-full bg-gradient-to-r from-violet-500 to-cyan-500" />
+
         <div className="p-6">
           {/* Header */}
-          <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {isEditMode ? "Edit Task" : "Add New Task"}
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+          <div className="mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-500 to-cyan-500" />
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                {isEditMode ? "Edit Task" : "Add New Task"}
+              </h2>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 ml-3">
               {isEditMode
                 ? "Update your task details"
                 : "Record your training activity"}
@@ -172,13 +179,13 @@ export default function EntryForm({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Date */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Date *
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                  Date <span className="text-violet-500">*</span>
                 </label>
                 <input
                   type="date"
                   {...register("date", { required: "Date is required" })}
-                  className="w-full text-sm px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-slate-900 dark:text-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all"
+                  className={inputClass}
                 />
                 {errors.date && (
                   <p className="text-red-500 dark:text-red-400 text-xs mt-1">
@@ -189,13 +196,13 @@ export default function EntryForm({
 
               {/* Time In */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Time In *
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                  Time In <span className="text-violet-500">*</span>
                 </label>
                 <input
                   type="time"
                   {...register("timeIn", { required: "Time in is required" })}
-                  className="w-full text-sm px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-slate-900 dark:text-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all"
+                  className={inputClass}
                 />
                 {errors.timeIn && (
                   <p className="text-red-500 dark:text-red-400 text-xs mt-1">
@@ -206,15 +213,13 @@ export default function EntryForm({
 
               {/* Time Out */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Time Out *
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                  Time Out <span className="text-violet-500">*</span>
                 </label>
                 <input
                   type="time"
-                  {...register("timeOut", {
-                    required: "Time out is required",
-                  })}
-                  className="w-full text-sm px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-slate-900 dark:text-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all"
+                  {...register("timeOut", { required: "Time out is required" })}
+                  className={inputClass}
                 />
                 {errors.timeOut && (
                   <p className="text-red-500 dark:text-red-400 text-xs mt-1">
@@ -224,30 +229,38 @@ export default function EntryForm({
               </div>
             </div>
 
-            {/* Hours Display */}
+            {/* Hours Display — matches dashboard progress card style */}
             {hoursRendered > 0 && (
-              <div className="bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <div className="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet-500 to-cyan-500" />
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5 text-blue-600 dark:text-blue-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Total Hours
-                    </span>
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+                        Hours Rendered
+                      </p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                        {formatHoursMinutes(hoursRendered)}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    {formatHoursMinutes(hoursRendered)}
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400">
+                    Calculated
                   </span>
                 </div>
               </div>
@@ -257,15 +270,15 @@ export default function EntryForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Task Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Task Description *
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                  Task Description <span className="text-violet-500">*</span>
                 </label>
                 <input
                   type="text"
                   {...register("taskName", {
                     required: "Task description is required",
                   })}
-                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-slate-900 dark:text-white dark:bg-gray-700 rounded-lg focus:outline-none text-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all"
+                  className={inputClass}
                   placeholder="What did you work on?"
                 />
                 {errors.taskName && (
@@ -277,14 +290,14 @@ export default function EntryForm({
 
               {/* Category */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Category *
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                  Category <span className="text-violet-500">*</span>
                 </label>
                 <select
                   {...register("category", {
                     required: "Category is required",
                   })}
-                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-slate-900 dark:text-white dark:bg-gray-700 rounded-lg focus:outline-none text-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all"
+                  className={inputClass}
                 >
                   <option value="">Select a category...</option>
                   {CATEGORIES.map((cat) => (
@@ -301,29 +314,29 @@ export default function EntryForm({
               </div>
             </div>
 
-            {/* Learning Outcome - Full Width */}
+            {/* Learning Outcome */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
                 Learning Outcome{" "}
-                <span className="text-gray-400 dark:text-gray-500 text-xs">
+                <span className="text-gray-400 dark:text-gray-600 normal-case font-normal">
                   (Optional)
                 </span>
               </label>
               <textarea
                 {...register("notes")}
                 rows={3}
-                className="w-full text-sm px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-slate-900 dark:text-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all resize-none"
+                className={inputClass + " resize-none"}
                 placeholder="What did you learn? Any insights or observations..."
               />
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
               <button
                 type="button"
                 onClick={onCancel}
                 disabled={loading}
-                className="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 disabled:cursor-not-allowed transition-colors"
               >
                 Cancel
               </button>
@@ -331,13 +344,33 @@ export default function EntryForm({
                 type="button"
                 onClick={handleSubmit(onSubmit)}
                 disabled={loading}
-                className="flex-1 px-6 py-2.5 bg-blue-600 dark:bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors shadow-sm hover:shadow-md"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-700 hover:to-cyan-600 text-white text-sm font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg hover:shadow-violet-500/20"
               >
-                {loading
-                  ? "Saving..."
-                  : isEditMode
-                    ? "Update Task"
-                    : "Save Task"}
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : isEditMode ? (
+                  "Update Task"
+                ) : (
+                  <>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Save Task
+                  </>
+                )}
               </button>
             </div>
           </div>
