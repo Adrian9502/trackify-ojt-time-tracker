@@ -25,31 +25,36 @@ export default function ConfirmationModal({
 
   const typeStyles = {
     danger: {
+      iconBg: "bg-red-50 dark:bg-red-900/20",
+      iconColor: "text-red-500 dark:text-red-400",
       button:
-        "bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:ring-red-500",
-      icon: "text-red-600 dark:text-red-400",
+        "from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/20",
     },
     warning: {
+      iconBg: "bg-orange-50 dark:bg-orange-900/20",
+      iconColor: "text-orange-500 dark:text-orange-400",
       button:
-        "bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-700 dark:hover:bg-yellow-800 focus:ring-yellow-500",
-      icon: "text-yellow-600 dark:text-yellow-400",
+        "from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 shadow-orange-500/20",
     },
     info: {
+      iconBg: "bg-violet-50 dark:bg-violet-900/20",
+      iconColor: "text-violet-500 dark:text-violet-400",
       button:
-        "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:ring-blue-500",
-      icon: "text-blue-600 dark:text-blue-400",
+        "from-violet-600 to-cyan-500 hover:from-violet-700 hover:to-cyan-600 shadow-violet-500/20",
     },
   };
 
-  const currentStyle = typeStyles[type];
+  const s = typeStyles[type];
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
-        <div className="flex items-start gap-4">
-          <div className={`shrink-0 ${currentStyle.icon}`}>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 max-w-md w-full p-6">
+        <div className="flex items-start gap-4 mb-6">
+          <div
+            className={`p-2.5 rounded-xl shrink-0 ${s.iconBg} ${s.iconColor}`}
+          >
             <svg
-              className="w-6 h-6"
+              className="w-5 h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -63,25 +68,25 @@ export default function ConfirmationModal({
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">
               {title}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {message}
             </p>
           </div>
         </div>
 
-        <div className="flex gap-3 mt-6">
+        <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
           >
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 px-4 py-2.5 text-white text-sm font-medium rounded-lg transition-colors ${currentStyle.button}`}
+            className={`flex-1 px-4 py-2.5 bg-gradient-to-r ${s.button} text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:shadow-lg`}
           >
             {confirmText}
           </button>

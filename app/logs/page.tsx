@@ -8,7 +8,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import TaskTable from "@/components/TaskTable";
 import EntryForm from "@/components/EntryForm";
 import { toast } from "react-toastify";
-
+import { FidgetSpinner } from "react-loader-spinner";
 export default function TimeLogsPage() {
   const { status } = useSession();
   const router = useRouter();
@@ -116,7 +116,15 @@ export default function TimeLogsPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-violet-200 dark:border-violet-800 border-t-violet-600 dark:border-t-violet-400 rounded-full animate-spin" />
+          <FidgetSpinner
+            visible={true}
+            height="80"
+            width="80"
+            ariaLabel="fidget-spinner-loading"
+            wrapperStyle={{}}
+            backgroundColor="#8b5cf6"
+            wrapperClass="fidget-spinner-wrapper"
+          />
           <p className="text-gray-500 dark:text-gray-400 text-sm">
             Loading your time logs...
           </p>

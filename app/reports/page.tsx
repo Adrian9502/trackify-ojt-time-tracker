@@ -8,6 +8,7 @@ import { calculateStats } from "@/lib/store";
 import { formatHours, formatHoursMinutes } from "@/lib/utils";
 import DashboardLayout from "@/components/DashboardLayout";
 import { toast } from "react-toastify";
+import { FidgetSpinner } from "react-loader-spinner";
 
 // ─── Mini sparkline component ─────────────────────────────────────────────────
 function Sparkline({ values }: { values: number[] }) {
@@ -211,7 +212,15 @@ export default function ReportsPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-violet-200 dark:border-violet-800 border-t-violet-600 dark:border-t-violet-400 rounded-full animate-spin" />
+          <FidgetSpinner
+            visible={true}
+            height="80"
+            width="80"
+            ariaLabel="fidget-spinner-loading"
+            wrapperStyle={{}}
+            wrapperClass="fidget-spinner-wrapper"
+            backgroundColor="#8b5cf6"
+          />
           <p className="text-gray-500 dark:text-gray-400 text-sm">
             Loading reports...
           </p>

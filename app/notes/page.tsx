@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import NotesSection from "@/components/NotesSection";
-
+import { FidgetSpinner } from "react-loader-spinner";
 export default function NotesPage() {
   const { status } = useSession();
   const router = useRouter();
@@ -19,27 +19,38 @@ export default function NotesPage() {
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400 mt-4">Loading...</p>
+        <div className="flex flex-col items-center gap-4">
+          <FidgetSpinner
+            visible={true}
+            height="80"
+            width="80"
+            ariaLabel="fidget-spinner-loading"
+            wrapperStyle={{}}
+            wrapperClass="fidget-spinner-wrapper"
+            backgroundColor="#8b5cf6"
+          />
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
+            Loading your notes...
+          </p>
         </div>
       </div>
     );
   }
 
-  if (status === "unauthenticated") {
-    return null;
-  }
+  if (status === "unauthenticated") return null;
 
   return (
     <DashboardLayout>
-      <div className="p-6 lg:p-8">
+      <div className="p-6 lg:p-8 mx-auto">
         {/* Page Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Notes
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-1 h-6 rounded-full bg-gradient-to-b from-violet-500 to-cyan-500" />
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              Notes
+            </h1>
+          </div>
+          <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 ml-3">
             Keep track of important information and reminders
           </p>
         </div>
