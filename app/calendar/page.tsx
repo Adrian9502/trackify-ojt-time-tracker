@@ -9,6 +9,8 @@ import DateDetailsModal from "@/components/DateDetailsModal";
 import { formatHoursMinutes } from "@/lib/utils";
 import { toast } from "react-toastify";
 
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 export default function CalendarPage() {
   const { status } = useSession();
   const router = useRouter();
@@ -19,20 +21,15 @@ export default function CalendarPage() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
-    }
+    if (status === "unauthenticated") router.push("/auth/signin");
   }, [status, router]);
 
   const loadData = async () => {
     try {
       const response = await fetch("/api/entries");
       if (!response.ok) throw new Error("Failed to fetch entries");
-
-      const loadedEntries = await response.json();
-      setEntries(loadedEntries);
-    } catch (error) {
-      console.error("Failed to load entries:", error);
+      setEntries(await response.json());
+    } catch {
       toast.error("Failed to load calendar. Please refresh the page.");
     } finally {
       setLoading(false);
@@ -40,37 +37,25 @@ export default function CalendarPage() {
   };
 
   useEffect(() => {
-    if (status === "authenticated") {
-      loadData();
-    }
+    if (status === "authenticated") loadData();
   }, [status]);
 
-  // Get days in current month
-  const daysInMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth() + 1,
-    0,
-  ).getDate();
-
-  const firstDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    1,
-  ).getDay();
-
+  // ── Calendar math ───────────────────────────────────────────────────────
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
 
-  // Map entries to dates - FIXED: Now combines multiple entries for the same date
+  // ── Entry map ────────────────────────────────────────────────────────────
   const entriesByDate = entries.reduce(
     (acc, entry) => {
-      const dateKey = new Date(entry.date).toDateString();
-      if (!acc[dateKey]) {
-        acc[dateKey] = { totalHours: 0, count: 0, entries: [] };
-      }
-      acc[dateKey].totalHours += entry.totalHours;
-      acc[dateKey].count += 1;
-      acc[dateKey].entries.push(entry);
+      const key = new Date(entry.date).toDateString();
+      if (!acc[key]) acc[key] = { totalHours: 0, count: 0, entries: [] };
+      acc[key].totalHours += entry.totalHours;
+      acc[key].count += 1;
+      acc[key].entries.push(entry);
       return acc;
     },
     {} as Record<
@@ -79,77 +64,182 @@ export default function CalendarPage() {
     >,
   );
 
-  const previousMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1),
-    );
-  };
+  // ── Month stats ──────────────────────────────────────────────────────────
+  const monthStats = days.reduce(
+    (acc, day) => {
+      const key = new Date(year, month, day).toDateString();
+      const d = entriesByDate[key];
+      if (d) {
+        acc.totalHours += d.totalHours;
+        acc.activeDays += 1;
+      }
+      return acc;
+    },
+    { totalHours: 0, activeDays: 0 },
+  );
 
-  const nextMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1),
-    );
-  };
+  const previousMonth = () => setCurrentDate(new Date(year, month - 1));
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1));
 
   const handleDateClick = (day: number) => {
-    const date = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      day,
-    );
-    const dateKey = date.toDateString();
-    const dayData = entriesByDate[dateKey];
-
-    if (dayData && dayData.entries.length > 0) {
+    const date = new Date(year, month, day);
+    const key = date.toDateString();
+    if (entriesByDate[key]?.entries.length) {
       setSelectedDate(date);
       setShowDetailsModal(true);
     }
   };
 
-  const getEntriesForDate = (date: Date): OJTEntry[] => {
-    const dateKey = date.toDateString();
-    return entriesByDate[dateKey]?.entries || [];
-  };
+  const getEntriesForDate = (date: Date): OJTEntry[] =>
+    entriesByDate[date.toDateString()]?.entries ?? [];
 
+  // ── Loading ───────────────────────────────────────────────────────────────
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400 mt-4">Loading...</p>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-violet-200 dark:border-violet-800 border-t-violet-600 dark:border-t-violet-400 rounded-full animate-spin" />
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
+            Loading calendar...
+          </p>
         </div>
       </div>
     );
   }
 
-  if (status === "unauthenticated") {
-    return null;
-  }
+  if (status === "unauthenticated") return null;
+
+  const todayKey = new Date().toDateString();
 
   return (
     <DashboardLayout onSettingsUpdate={loadData}>
-      <div className="p-4 sm:p-6 lg:p-8">
-        {/* Page Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Calendar View
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-            Visual timeline of your training activities • Click on a date with
-            entries to view details
+      <div className="p-6 lg:p-8">
+        {/* ── Page Header ───────────────────────────────────────────────── */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-1 h-6 rounded-full bg-linear-to-b from-violet-500 to-cyan-500" />
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              Calendar View
+            </h1>
+          </div>
+          <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 ml-3">
+            Visual timeline of your training activities · click a date to view
+            details
           </p>
         </div>
 
-        {/* Calendar */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-          {/* Calendar Header */}
-          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+        {/* ── Month summary pills ────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+          {[
+            {
+              label: "Active Days",
+              value: monthStats.activeDays,
+              sub: "this month",
+              iconBg: "bg-violet-50 dark:bg-violet-900/20",
+              iconColor: "text-violet-600 dark:text-violet-400",
+              accent: "from-violet-500 to-purple-600",
+              icon: (
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              ),
+            },
+            {
+              label: "Hours This Month",
+              value: formatHoursMinutes(monthStats.totalHours),
+              sub: "logged so far",
+              iconBg: "bg-cyan-50 dark:bg-cyan-900/20",
+              iconColor: "text-cyan-600 dark:text-cyan-400",
+              accent: "from-cyan-500 to-blue-500",
+              icon: (
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              ),
+            },
+            {
+              label: "Avg / Active Day",
+              value: monthStats.activeDays
+                ? formatHoursMinutes(
+                    monthStats.totalHours / monthStats.activeDays,
+                  )
+                : "—",
+              sub: "average session",
+              iconBg: "bg-emerald-50 dark:bg-emerald-900/20",
+              iconColor: "text-emerald-600 dark:text-emerald-400",
+              accent: "from-emerald-400 to-teal-500",
+              icon: (
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              ),
+            },
+          ].map((card) => (
+            <div
+              key={card.label}
+              className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 overflow-hidden hover:shadow-md transition-shadow duration-200"
+            >
+              <div
+                className={`absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r ${card.accent}`}
+              />
+              <div
+                className={`inline-flex p-2.5 rounded-xl mb-3 ${card.iconBg} ${card.iconColor}`}
+              >
+                {card.icon}
+              </div>
+              <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-0.5">
+                {card.label}
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {card.value}
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                {card.sub}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Calendar Card ──────────────────────────────────────────────── */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          {/* Navigation header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <button
               onClick={previousMonth}
-              className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <svg
-                className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -162,18 +252,22 @@ export default function CalendarPage() {
                 />
               </svg>
             </button>
-            <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-white">
-              {currentDate.toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric",
-              })}
-            </h2>
+
+            <div className="text-center">
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                {currentDate.toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </h2>
+            </div>
+
             <button
               onClick={nextMonth}
-              className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <svg
-                className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -188,90 +282,115 @@ export default function CalendarPage() {
             </button>
           </div>
 
-          {/* Calendar Grid */}
-          <div className="p-3 sm:p-4 md:p-6">
-            {/* Day headers */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1 sm:mb-2">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                <div
-                  key={day}
-                  className="text-center text-[10px] sm:text-xs font-semibold text-gray-600 dark:text-gray-400 py-1 sm:py-2"
-                >
-                  <span className="hidden sm:inline">{day}</span>
-                  <span className="sm:hidden">{day.charAt(0)}</span>
+          {/* Grid */}
+          <div className="p-4 sm:p-6">
+            {/* Weekday headers */}
+            <div className="grid grid-cols-7 mb-2">
+              {WEEKDAYS.map((d) => (
+                <div key={d} className="text-center py-2">
+                  <span className="hidden sm:inline text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+                    {d}
+                  </span>
+                  <span className="sm:hidden text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+                    {d.charAt(0)}
+                  </span>
                 </div>
               ))}
             </div>
 
-            {/* Calendar days */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2">
-              {blanks.map((blank) => (
-                <div key={`blank-${blank}`} className="aspect-square" />
+            {/* Day cells */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+              {blanks.map((b) => (
+                <div key={`blank-${b}`} className="aspect-square" />
               ))}
+
               {days.map((day) => {
-                const date = new Date(
-                  currentDate.getFullYear(),
-                  currentDate.getMonth(),
-                  day,
-                );
-                const dateKey = date.toDateString();
-                const dayData = entriesByDate[dateKey];
-                const isToday = dateKey === new Date().toDateString();
-                const hasEntries = dayData && dayData.entries.length > 0;
+                const date = new Date(year, month, day);
+                const key = date.toDateString();
+                const dayData = entriesByDate[key];
+                const isToday = key === todayKey;
+                const hasEntries = !!dayData?.entries.length;
 
                 return (
                   <button
                     key={day}
                     onClick={() => handleDateClick(day)}
                     disabled={!hasEntries}
-                    className={`aspect-square p-1 sm:p-2 rounded-md sm:rounded-lg border transition-all ${
+                    className={[
+                      "aspect-square rounded-xl border flex flex-col items-center justify-center p-1 sm:p-2 transition-all duration-150 relative overflow-hidden group",
                       isToday
-                        ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                        : dayData
-                          ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 hover:shadow-md cursor-pointer"
-                          : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-default"
-                    } ${hasEntries ? "group" : ""}`}
+                        ? "border-violet-400 dark:border-violet-500 bg-violet-50 dark:bg-violet-900/20"
+                        : hasEntries
+                          ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/10 hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-md cursor-pointer"
+                          : "border-gray-100 dark:border-gray-700 cursor-default",
+                    ].join(" ")}
                   >
-                    <div className="text-[10px] sm:text-sm font-medium text-gray-900 dark:text-white mb-0.5 sm:mb-1">
+                    {/* Today gradient top bar */}
+                    {isToday && (
+                      <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-violet-500 to-cyan-500" />
+                    )}
+
+                    <span
+                      className={[
+                        "text-xs sm:text-sm font-semibold leading-none mb-0.5",
+                        isToday
+                          ? "text-violet-600 dark:text-violet-400"
+                          : hasEntries
+                            ? "text-gray-900 dark:text-white"
+                            : "text-gray-400 dark:text-gray-600",
+                      ].join(" ")}
+                    >
                       {day}
-                    </div>
-                    {dayData && (
+                    </span>
+
+                    {hasEntries && (
                       <>
-                        {/* UPDATED: Show hrs-min format */}
-                        <div className="text-[9px] sm:text-xs font-semibold text-green-600 dark:text-green-400">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-emerald-600 dark:text-emerald-400 leading-none">
                           {formatHoursMinutes(dayData.totalHours)}
-                        </div>
-                        {hasEntries && (
-                          <div className="hidden sm:block text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                            {dayData.count}{" "}
-                            {dayData.count === 1 ? "entry" : "entries"}
-                          </div>
-                        )}
+                        </span>
+                        <span className="hidden sm:block text-[8px] text-gray-400 dark:text-gray-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors mt-0.5 leading-none">
+                          {dayData.count}{" "}
+                          {dayData.count === 1 ? "entry" : "entries"}
+                        </span>
                       </>
+                    )}
+
+                    {/* Hover indicator for clickable days */}
+                    {hasEntries && (
+                      <div className="absolute inset-0 rounded-xl ring-2 ring-emerald-400 dark:ring-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                     )}
                   </button>
                 );
               })}
             </div>
           </div>
-        </div>
 
-        {/* Legend */}
-        <div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded border-2 border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20"></div>
-            <span className="text-gray-600 dark:text-gray-400">Today</span>
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded border-2 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"></div>
-            <span className="text-gray-600 dark:text-gray-400">
-              Has entries (click to view)
-            </span>
+          {/* Legend */}
+          <div className="px-6 py-3 border-t border-gray-100 dark:border-gray-700 flex flex-wrap items-center gap-4 sm:gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-3.5 h-3.5 rounded-md border-2 border-violet-400 bg-violet-50 dark:border-violet-500 dark:bg-violet-900/20 relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-violet-500 to-cyan-500" />
+              </div>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                Today
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3.5 h-3.5 rounded-md border-2 border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/10" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                Has entries · click to view
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3.5 h-3.5 rounded-md border-2 border-gray-100 dark:border-gray-700" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                No entries
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Date Details Modal */}
       {showDetailsModal && selectedDate && (
         <DateDetailsModal
           isOpen={showDetailsModal}
