@@ -9,7 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "OJT Time Tracker",
+  title: "Trackify - OJT Time Tracker",
   description: "Track your on-the-job training hours",
 };
 

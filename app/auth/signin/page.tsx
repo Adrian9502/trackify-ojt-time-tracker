@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import Image from "next/image";
 
 function SignInContent() {
   const searchParams = useSearchParams();
@@ -38,13 +39,16 @@ function SignInContent() {
 
 export default function SignIn() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-cyan-700 via-indigo-500 to-purple-700 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            OJT Time Tracker
-          </h1>
-          <p className="text-gray-600">Sign in to track your training hours</p>
+        <div className="flex justify-center mb-8">
+          <Image
+            src="/trackify.png"
+            alt="Trackify"
+            width={220}
+            height={120}
+            className="object-contain pointer-events-none"
+          />
         </div>
 
         <div className="space-y-4">
