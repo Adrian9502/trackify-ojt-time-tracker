@@ -155,37 +155,67 @@ export default function Sidebar({ onSettingsClick }: SidebarProps) {
       >
         <div className="flex flex-col h-full">
           {/* Logo & Toggle */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
-            {!isCollapsed && (
-              <div className="flex items-center bg-linear-to-br bg-clip-text from-blue-600 to-indigo-600 rounded-lg justify-center">
-                <Link
-                  href="/"
-                  className="font-bold text-gray-900 dark:text-white text-md"
-                >
-                  OJT Time Tracker
-                </Link>
-              </div>
-            )}
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <svg
-                className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${
-                  isCollapsed ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div className="flex flex-col border-b border-gray-200 dark:border-gray-800">
+            {/* Toggle button row */}
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                <svg
+                  className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${
+                    isCollapsed ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Logo area */}
+            {!isCollapsed ? (
+              <Link
+                href="/"
+                className="flex flex-col items-center gap-2 pb-2 group"
+              >
+                <div className="relative">
+                  <Image
+                    src="/clock.png"
+                    alt="Trackify Icon"
+                    width={60}
+                    height={60}
+                    className="relative object-contain"
+                  />
+                </div>
+                <Image
+                  src="/Title.png"
+                  alt="Trackify"
+                  width={140}
+                  height={40}
+                  className="object-contain transition-all duration-300"
                 />
-              </svg>
-            </button>
+              </Link>
+            ) : (
+              <Link href="/" className="flex justify-center pb-4 group">
+                <div className="relative">
+                  <Image
+                    src="/clock.png"
+                    alt="Trackify Icon"
+                    width={36}
+                    height={36}
+                    className="relative object-contain "
+                  />
+                </div>
+              </Link>
+            )}
           </div>
 
           {/* Navigation */}
@@ -198,14 +228,14 @@ export default function Sidebar({ onSettingsClick }: SidebarProps) {
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group ${
                     isActive
-                      ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                      ? "bg-purple-100 dark:bg-purple-700/20 text-blue-600 dark:text-cyan-400 "
                       : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                   title={isCollapsed ? item.name : undefined}
                 >
                   <div
                     className={
-                      isActive ? "text-blue-600 dark:text-blue-400" : ""
+                      isActive ? "text-blue-600 dark:text-cyan-400" : ""
                     }
                   >
                     {item.icon}
