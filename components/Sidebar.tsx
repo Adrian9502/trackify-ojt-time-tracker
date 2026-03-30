@@ -190,15 +190,15 @@ export default function Sidebar({ onSettingsClick }: SidebarProps) {
                   <Image
                     src="/Clock2.png"
                     alt="Trackify Icon"
-                    width={60}
-                    height={60}
+                    width={55}
+                    height={55}
                     className="relative object-contain"
                   />
                 </div>
                 <Image
                   src="/Title.png"
                   alt="Trackify"
-                  width={140}
+                  width={130}
                   height={40}
                   className="object-contain transition-all duration-300"
                 />
