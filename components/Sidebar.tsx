@@ -188,7 +188,7 @@ export default function Sidebar({ onSettingsClick }: SidebarProps) {
               >
                 <div className="relative">
                   <Image
-                    src="/clock.png"
+                    src="/Clock2.png"
                     alt="Trackify Icon"
                     width={60}
                     height={60}
@@ -207,7 +207,7 @@ export default function Sidebar({ onSettingsClick }: SidebarProps) {
               <Link href="/" className="flex justify-center pb-4 group">
                 <div className="relative">
                   <Image
-                    src="/clock.png"
+                    src="/Clock2.png"
                     alt="Trackify Icon"
                     width={36}
                     height={36}
