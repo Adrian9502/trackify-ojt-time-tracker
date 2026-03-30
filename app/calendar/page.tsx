@@ -354,10 +354,10 @@ export default function CalendarPage() {
 
                     {hasEntries && (
                       <>
-                        <span className="text-[9px] sm:text-[10px] font-bold text-emerald-600 dark:text-emerald-400 leading-none">
+                        <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400 leading-none">
                           {formatHoursMinutes(dayData.totalHours)}
                         </span>
-                        <span className="hidden sm:block text-[8px] text-gray-400 dark:text-gray-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors mt-0.5 leading-none">
+                        <span className="hidden sm:block text-base  text-gray-400 dark:text-gray-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors mt-0.5 leading-none">
                           {dayData.count}{" "}
                           {dayData.count === 1 ? "entry" : "entries"}
                         </span>
